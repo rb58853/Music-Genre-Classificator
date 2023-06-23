@@ -1,34 +1,35 @@
+import telebot
 import os
-from telegram.ext import Updater, CommandHandler, MessageHandler
+import model
 
-token = os.getenv('TELEGRAM_BOT_TOKEN')
+TOKEN = '6152621847:AAE0zasatsZxif2nTV1BsxN_mkBKpmx45Ng'
+bot = telebot.TeleBot(TOKEN)
 
-# Define la función que maneja el comando de inicio
-def start(update, context):
-    update.message.reply_text('Hola! Envíame un archivo de audio para procesarlo.')
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.reply_to(message, "Bienvenido, ¿en qué puedo ayudarte?")
 
-# Define la función que maneja los archivos de audio
-def handle_audio(update, context):
-    # Descarga el archivo de audio
-    file = context.bot.get_file(update.message.voice.file_id)
-    file.download('audio.ogg')
-    
-    # Realiza cualquier acción que desees con el archivo de audio
-    # En este ejemplo, simplemente lo renombramos
-    os.rename('audio.ogg', 'audio_recibido.ogg')
-    
-    # Envía una respuesta al usuario
-    update.message.reply_text('Archivo de audio recibido y procesado correctamente.')
+@bot.message_handler(content_types=['voice', 'audio'])
+def handle_audio(message):
+    if message.content_type == 'voice':
+        file_info = bot.get_file(message.voice.file_id)
+    elif message.content_type == 'audio':
+        file_info = bot.get_file(message.audio.file_id)
+    else:
+        return
 
-# Crea un nuevo bot
-updater = Updater('TOKEN', use_context=True)
+    downloaded_file = bot.download_file(file_info.file_path)
 
-# Agrega un manejador para el comando de inicio
-updater.dispatcher.add_handler(CommandHandler('start', start))
 
-# # Agrega un manejador para los archivos de audio
-# updater.dispatcher.add_handler(MessageHandler(Filters.voice, handle_audio))
+    # Guarda el archivo de audio localmente
+    # with open('audio_received.ogg', 'wb') as f:
+    #     f.write(downloaded_file)
 
-# Inicia el bot
-updater.start_polling()
-updater.idle()
+    # Envía un mensaje al usuario que envió el audio
+    bot.send_message(message.chat.id, "He recibido tu audio. Lo clasificare en un genero musical. Estoy entrenado para diferenciar entre los posibles generos:\n⦿ <code>blues</code> \n⦿ <code>classical</code> \n⦿ <code>country</code> \n⦿ <code>disco</code>\n⦿ <code>hiphop</code> \n⦿ <code>jazz</code>, \n⦿ <code>metal</code>, \n⦿ <code>pop</code>, \n⦿ <code>reggae</code>, \n⦿ <code>rock</code>", parse_mode='html')
+    genre = model.get_genre(downloaded_file)
+    bot.send_message(message.chat.id, f"El genero de su audio es <code>{genre}</code>.", parse_mode= 'html')
+
+
+
+bot.polling(none_stop=True)
