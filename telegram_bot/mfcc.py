@@ -8,6 +8,6 @@ def read_image(filepath):
 
 def get(audio_path):
     x , sr = librosa.load(audio_path)
-    get_mfcc(x,sr)
+    # get_mfcc(x,sr)
     mfccs = librosa.feature.mfcc(y= x, sr=sr)
     return mfccs

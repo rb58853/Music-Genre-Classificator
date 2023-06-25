@@ -19,15 +19,12 @@ def handle_audio(message):
         return
 
     downloaded_file = bot.download_file(file_info.file_path)
-
-
-    # Guarda el archivo de audio localmente
-    # with open('audio_received.ogg', 'wb') as f:
-    #     f.write(downloaded_file)
-
+    path_name = 'random_name'
+    with open(path_name, 'wb') as fd:
+        fd.write(downloaded_file)
     # Envía un mensaje al usuario que envió el audio
     bot.send_message(message.chat.id, "He recibido tu audio. Lo clasificare en un genero musical. Estoy entrenado para diferenciar entre los posibles generos:\n⦿ <code>blues</code> \n⦿ <code>classical</code> \n⦿ <code>country</code> \n⦿ <code>disco</code>\n⦿ <code>hiphop</code> \n⦿ <code>jazz</code>, \n⦿ <code>metal</code>, \n⦿ <code>pop</code>, \n⦿ <code>reggae</code>, \n⦿ <code>rock</code>", parse_mode='html')
-    genre = model.get_genre(downloaded_file)
+    genre = model.get_genre(path_name)
     bot.send_message(message.chat.id, f"El genero de su audio es <code>{genre}</code>.", parse_mode= 'html')
 
 
